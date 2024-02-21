@@ -8,7 +8,9 @@ class CreateDeleteOnlyAdmin(permissions.IsAdminUser):
     def has_permission(self, request, view):
         if request.user.is_authenticated:
             return (request.method in permissions.SAFE_METHODS
-                    or request.user.role == 'admin')
+                    or request.user.role == 'admin'
+                    or request.user.is_staff
+                    or request.user.is_superuser)
         return request.method in permissions.SAFE_METHODS
     # Класс создан как заглушка, чтобы прошли тесты.
     # Требует доработки после написания модели User
