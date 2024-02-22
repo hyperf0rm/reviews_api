@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_filters',
     'djoser',
     # тесты не хотели запускаться, пришлось установить джосер
     'users.apps.UsersConfig',

@@ -1,13 +1,15 @@
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
 from rest_framework.pagination import PageNumberPagination
 
 from api.filters import TitleFilter
 from api.mixins import CreateListDeleteViewSet
-from api.permissions import CreateDeleteOnlyAdmin
+from api.permissions import CreateDeleteOnlyAdmin, IsAuthorOrModeratorOrAdmin
 from api.serializers import (CategorySerializer, GenreSerializer,
-                             TitleListSerializer, TitleSerializer)
-from reviews.models import Category, Genre, Title
+                             ReviewSerializer, TitleListSerializer,
+                             TitleSerializer)
+from reviews.models import Category, Genre, Review, Title
 
 
 class CategoryViewSet(CreateListDeleteViewSet):
@@ -48,3 +50,21 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.action in ('list', 'retrieve'):
             return TitleListSerializer
         return TitleSerializer
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    pagination_class = PageNumberPagination
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    http_method_names = ('get', 'post', 'patch', 'delete')
+    permission_classes = [IsAuthorOrModeratorOrAdmin, ]
+
+    def get_title(self):
+        return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+
+    def perform_create(self, serializer):
+        serializer.is_valid(raise_exception=False)
+        serializer.save(title=self.get_title(), author=self.request.user)
+
+    def get_queryset(self):
+        return self.get_title().rewiews.all()
