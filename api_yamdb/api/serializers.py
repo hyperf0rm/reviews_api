@@ -3,6 +3,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from reviews.models import Title, Genre, Category
+import datetime as dt
 
 User = get_user_model()
 
@@ -77,3 +79,42 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
         data['token'] = str(refresh.access_token)
 
         return {'token': data['token']}
+
+
+class GenreSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = Genre
+        exclude = ('id',)
+
+
+class CategorySerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = Category
+        exclude = ('id',)
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(many=True, slug_field='slug', queryset=Genre.objects.all())
+    category = serializers.SlugRelatedField(slug_field='slug', queryset=Category.objects.all())
+
+
+    class Meta:
+        model = Title
+        fields = '__all__'
+        read_only_fields = ('id',)
+
+    def __init__(self, *args, **kwargs):
+        super(TitleSerializer, self).__init__(*args, **kwargs)
+        if self.context['request'].method == 'GET':
+            self.fields['genre'] = GenreSerializer(many=True)
+            self.fields['category'] = CategorySerializer()
+
+    def validate_year(self, value):
+        if value > dt.datetime.now().year:
+            raise serializers.ValidationError('Enter a valid year.')
+        return value
+
