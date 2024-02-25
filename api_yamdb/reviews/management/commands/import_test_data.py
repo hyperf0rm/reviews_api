@@ -9,6 +9,7 @@ DATA = {
     "import_titles": "static/data/titles.csv",
     "import_genre_title": "static/data/genre_title.csv",
     "import_review": "static/data/review.csv",
+    "import_comments": "static/data/comments.csv",
 }
 
 
