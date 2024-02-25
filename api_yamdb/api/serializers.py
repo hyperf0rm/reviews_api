@@ -5,7 +5,7 @@ from django.db.utils import IntegrityError
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from reviews.models import Category, Genre, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -89,3 +89,12 @@ class ReviewSerializer(serializers.ModelSerializer):
         except IntegrityError:
             raise ValidationError('К одному произведению можно'
                                   'оставить только один отзыв.', code=404)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username')
+
+    class Meta:
+        model = Comment
+        exclude = ('review',)

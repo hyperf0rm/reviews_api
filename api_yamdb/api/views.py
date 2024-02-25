@@ -6,10 +6,10 @@ from rest_framework.pagination import PageNumberPagination
 from api.filters import TitleFilter
 from api.mixins import CreateListDeleteViewSet
 from api.permissions import CreateDeleteOnlyAdmin, IsAuthorOrModeratorOrAdmin
-from api.serializers import (CategorySerializer, GenreSerializer,
-                             ReviewSerializer, TitleListSerializer,
-                             TitleSerializer)
-from reviews.models import Category, Genre, Review, Title
+from api.serializers import (CategorySerializer, CommentSerializer,
+                             GenreSerializer, ReviewSerializer,
+                             TitleListSerializer, TitleSerializer)
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class CategoryViewSet(CreateListDeleteViewSet):
@@ -67,4 +67,23 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer.save(title=self.get_title(), author=self.request.user)
 
     def get_queryset(self):
-        return self.get_title().rewiews.all()
+        return self.get_title().reviews.all()
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    """API для комментариев к отзывам."""
+    pagination_class = PageNumberPagination
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    http_method_names = ('get', 'post', 'patch', 'delete')
+    permission_classes = [IsAuthorOrModeratorOrAdmin, ]
+
+    def get_review(self):
+        return get_object_or_404(Review, pk=self.kwargs.get('review_id'))
+
+    def perform_create(self, serializer):
+        serializer.is_valid(raise_exception=False)
+        serializer.save(review=self.get_review(), author=self.request.user)
+
+    def get_queryset(self):
+        return self.get_review().comments.all()

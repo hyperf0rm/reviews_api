@@ -89,7 +89,6 @@ class Review(models.Model):
         verbose_name='Произведение'
     )
     text = models.TextField('Текст отзыва')
-    # score = models.IntegerField('Оценка')
     score = models.IntegerField(verbose_name='Оценка', choices=SCORE_CHOICES)
     author = models.ForeignKey(
         User,
@@ -98,16 +97,20 @@ class Review(models.Model):
     )
 
     class Meta:
-        default_related_name = 'rewiews'
+        default_related_name = 'reviews'
         verbose_name = 'отзыв'
         verbose_name_plural = 'Отзывы'
         ordering = '-pub_date',
         constraints = [
             models.UniqueConstraint(
                 fields=['title', 'author'],
-                name='onli_one_rewiew'
+                name='onli_one_review'
             )
         ]
+
+    def str(self):
+        return (f'Отзыв {self.id[:STR_LIMIT]}'
+                f'от {self.author.username[:STR_LIMIT]}')
 
 
 class GenreTitle(models.Model):
