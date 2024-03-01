@@ -9,6 +9,10 @@ User = get_user_model()
 class Category(models.Model):
     """Модель для объектов Категории."""
     name = models.CharField('Название', max_length=MAX_TITLE_LEN)
+
+class Category(models.Model):
+    """Модель для объектов Категории."""
+    name = models.CharField('Заголовок', max_length=MAX_TITLE_LEN)
     slug = models.SlugField(
         'Идентификатор',
         unique=True,
@@ -22,6 +26,7 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name[:STR_LIMIT]
+
 
 
 class Genre(models.Model):
