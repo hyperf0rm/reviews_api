@@ -23,20 +23,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class SignupSerializer(serializers.ModelSerializer):
-        email = serializers.EmailField(
-            max_length=254, 
-            required=True,
-            validators=[UniqueValidator(
-                queryset=User.objects.all(),
-                message='User with such email already exists.')])
-        username = serializers.RegexField(
-            regex=r'^[\w.@+-]+\Z',
-            max_length=150,
-            required=True,
-            validators=[UniqueValidator(
-                queryset=User.objects.all(),
-                message='User with such username already exists.')])
-
 
         class Meta:
             model = User
