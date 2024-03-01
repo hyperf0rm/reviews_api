@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from reviews.models import Title, Genre, Category
+from reviews.models import Title, Genre, Category, Review
 import datetime as dt
 
 User = get_user_model()
@@ -100,6 +100,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(many=True, slug_field='slug', queryset=Genre.objects.all())
     category = serializers.SlugRelatedField(slug_field='slug', queryset=Category.objects.all())
+    rating = serializers.ReadOnlyField()
 
 
     class Meta:
@@ -117,4 +118,23 @@ class TitleSerializer(serializers.ModelSerializer):
         if value > dt.datetime.now().year:
             raise serializers.ValidationError('Enter a valid year.')
         return value
+    
 
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(read_only=True, 
+                                          slug_field='username',
+                                          default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Review
+        fields = '__all__'
+        extra_kwargs = {
+            'title': {'write_only': True},
+        }
+
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=('author', 'title')
+            )
+        ]

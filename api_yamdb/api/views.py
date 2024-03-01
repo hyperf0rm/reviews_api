@@ -1,19 +1,19 @@
 from django.contrib.auth import get_user_model
 from rest_framework import (filters, generics, status,
                             viewsets, mixins)
-from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import action, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from users.utils import send_confirmation_code
 from django_filters import rest_framework as f
 from reviews.models import Title, Category, Genre
-
-from .permissions import AdminOnly, AdminOrReadOnly
+from django.shortcuts import get_object_or_404
+from .permissions import AdminOnly, AdminOrReadOnly, AdminModeratorOrAuthor
 from .serializers import (SignupSerializer, TokenObtainSerializer,
                           UserProfileSerializer, UserSerializer,
                           TitleSerializer, GenreSerializer,
-                          CategorySerializer)
+                          CategorySerializer, ReviewSerializer)
 
 User = get_user_model()
 
@@ -105,3 +105,28 @@ class TitleViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
     filter_backends = (f.DjangoFilterBackend,)
     filterset_class = TitleFilter
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
+    
+    def get_queryset(self):
+        title = get_object_or_404(Title, pk=self.kwargs['title_id'])
+        return title.reviews.all()
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, pk=self.kwargs['title_id'])
+        serializer.save(author=self.request.user, title=title)
+
+    def get_permissions(self):
+        if self.action == 'partial_update' or self.action == 'destroy':
+            return (AdminModeratorOrAuthor(),)
+        return (IsAuthenticatedOrReadOnly(),)
+    
+    def create(self, request, *args, **kwargs):
+        title = get_object_or_404(Title, pk=self.kwargs['title_id'])
+        request.data._mutable = True
+        request.data.update({'title': title.id})
+        request.data._mutable = False
+        return super(ReviewViewSet, self).create(request, *args, **kwargs)
