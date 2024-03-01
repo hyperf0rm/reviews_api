@@ -1,8 +1,8 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import (SignupView, TokenObtainView, 
-                    UserViewSet, CategoryViewSet, 
+from .views import (SignupView, TokenObtainView,
+                    UserViewSet, CategoryViewSet,
                     GenreViewSet, ReviewViewSet,
                     TitleViewSet)
 

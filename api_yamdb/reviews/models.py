@@ -1,18 +1,19 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from reviews.constants import MAX_TITLE_LEN, STR_LIMIT
+from .constants import MAX_TITLE_LENGTH, STR_LIMIT
 
 User = get_user_model()
 
 
 class Category(models.Model):
     """Модель для объектов Категории."""
-    name = models.CharField('Название', max_length=MAX_TITLE_LEN)
+    name = models.CharField('Название', max_length=MAX_TITLE_LENGTH)
+
 
 class Category(models.Model):
     """Модель для объектов Категории."""
-    name = models.CharField('Заголовок', max_length=MAX_TITLE_LEN)
+    name = models.CharField('Заголовок', max_length=MAX_TITLE_LENGTH)
     slug = models.SlugField(
         'Идентификатор',
         unique=True,
@@ -28,10 +29,9 @@ class Category(models.Model):
         return self.name[:STR_LIMIT]
 
 
-
 class Genre(models.Model):
     """Модель для объектов Жанров."""
-    name = models.CharField('Заголовок', max_length=256)
+    name = models.CharField('Заголовок', max_length=MAX_TITLE_LENGTH)
     slug = models.SlugField(
         'Идентификатор',
         unique=True)
@@ -47,7 +47,7 @@ class Genre(models.Model):
 
 class Title(models.Model):
     """Модель для объектов Произведений."""
-    name = models.CharField('Название', max_length=MAX_TITLE_LEN)
+    name = models.CharField('Название', max_length=MAX_TITLE_LENGTH)
     year = models.IntegerField('Год выпуска')
     description = models.TextField('Описание')
     genre = models.ManyToManyField(
@@ -93,7 +93,6 @@ class Review(models.Model):
         verbose_name='Произведение'
     )
     text = models.TextField('Текст отзыва')
-    # score = models.IntegerField('Оценка')
     score = models.IntegerField(verbose_name='Оценка', choices=SCORE_CHOICES)
     author = models.ForeignKey(
         User,
@@ -102,13 +101,13 @@ class Review(models.Model):
     )
 
     class Meta:
-        default_related_name = 'rewiews'
+        default_related_name = 'reviews'
         verbose_name = 'отзыв'
         verbose_name_plural = 'Отзывы'
         ordering = '-pub_date',
         constraints = [
             models.UniqueConstraint(
                 fields=['title', 'author'],
-                name='onli_one_rewiew'
+                name='unique_reviews'
             )
         ]
