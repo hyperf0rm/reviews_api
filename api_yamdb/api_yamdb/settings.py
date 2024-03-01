@@ -21,6 +21,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'django_filters',
+    'djoser',
+    # тесты не хотели запускаться, пришлось установить джосер
     'users.apps.UsersConfig',
     'reviews.apps.ReviewsConfig',
     'api.apps.ApiConfig',
@@ -117,7 +121,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated', 
     ],
-
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
