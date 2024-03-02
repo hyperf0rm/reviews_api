@@ -12,13 +12,12 @@ from reviews.models import Category, Genre, Review, Title
 from api.filters import TitleFilter
 from api.mixins import CreateListDeleteViewSet
 
-from .permissions import (AdminOnly, CreateDeleteOnlyAdmin,
-                          IsAuthorOrModeratorOrAdmin)
+from .permissions import (AdminOnly, IsAdminOrReadOnly,
+                          IsAdminModeratorOrAuthor)
 from .serializers import (SignupSerializer, TokenObtainSerializer,
-                          UserProfileSerializer, UserSerializer,
+                          UserSerializer,
                           CategorySerializer, GenreSerializer,
-                          ReviewSerializer, TitleListSerializer,
-                          TitleSerializer)
+                          ReviewSerializer, TitleSerializer)
 
 User = get_user_model()
 
@@ -66,8 +65,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False,
             methods=['get', 'patch'],
-            permission_classes=(IsAuthenticated,),
-            serializer_class=UserProfileSerializer)
+            permission_classes=(IsAuthenticated,))
     def me(self, request):
         self.kwargs['username'] = request.user.username
         if request.method == 'GET':
@@ -83,7 +81,7 @@ class CategoryViewSet(CreateListDeleteViewSet):
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = (CreateDeleteOnlyAdmin,)
+    permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
 
 
@@ -94,7 +92,7 @@ class GenreViewSet(CreateListDeleteViewSet):
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = (CreateDeleteOnlyAdmin,)
+    permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
 
 
@@ -104,13 +102,8 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
-    permission_classes = (CreateDeleteOnlyAdmin,)
+    permission_classes = (IsAdminOrReadOnly,)
     http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
-
-    def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return TitleListSerializer
-        return TitleSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -118,7 +111,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
-    permission_classes = (IsAuthorOrModeratorOrAdmin,)
+    permission_classes = (IsAdminModeratorOrAuthor,)
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
