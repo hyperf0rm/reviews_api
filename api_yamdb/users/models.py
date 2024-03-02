@@ -14,7 +14,7 @@ class UserManager(BaseUserManager):
             raise ValueError('Username must be set')
         if not email:
             raise ValueError('Users must have an email address')
-        
+
         user = self.model(
             username=username,
             email=self.normalize_email(email),
@@ -23,7 +23,7 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
-    
+
     def create_superuser(self, username, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
@@ -35,7 +35,7 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self.create_user(username, email, password, **extra_fields)
-    
+
 
 class Roles(str, Enum):
     USER = 'user'
@@ -45,8 +45,8 @@ class Roles(str, Enum):
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(
-        'username', 
-        max_length=150, 
+        'username',
+        max_length=150,
         unique=True,
         validators=[
             RegexValidator(
@@ -80,3 +80,6 @@ class User(AbstractBaseUser, PermissionsMixin):
                 fields=['username', 'email'],
                 name='unique_users')
         ]
+
+    def __str__(self):
+        return self.username[:20]
