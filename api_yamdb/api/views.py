@@ -17,8 +17,7 @@ from .permissions import (AdminOnly, CreateDeleteOnlyAdmin,
 from .serializers import (SignupSerializer, TokenObtainSerializer,
                           UserProfileSerializer, UserSerializer,
                           CategorySerializer, GenreSerializer,
-                          ReviewSerializer, TitleListSerializer,
-                          TitleSerializer)
+                          ReviewSerializer, TitleSerializer)
 
 User = get_user_model()
 
@@ -106,11 +105,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
     permission_classes = (CreateDeleteOnlyAdmin,)
     http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
-
-    def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return TitleListSerializer
-        return TitleSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

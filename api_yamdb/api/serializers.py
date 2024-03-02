@@ -115,6 +115,12 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = '__all__'
 
+    def __init__(self, *args, **kwargs):
+        super(TitleSerializer, self).__init__(*args, **kwargs)
+        if self.context['request'].method == 'GET':
+            self.fields['genre'] = GenreSerializer(many=True)
+            self.fields['category'] = CategorySerializer()
+
     def validate_year(self, value):
         year = dt.date.today().year
         if not (value <= year):
@@ -130,22 +136,33 @@ class TitleSerializer(serializers.ModelSerializer):
         return int(average_rating)
 
 
-class TitleListSerializer(serializers.ModelSerializer):
-    """Сериализатор для обработки запросов к объекту Title. Только чтение."""
-    genre = GenreSerializer(read_only=True, many=True)
-    category = CategorySerializer(read_only=True)
-    rating = serializers.SerializerMethodField()
+'''class TitleSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True
+    )
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug'
+    )
+    rating = serializers.ReadOnlyField()
 
     class Meta:
         model = Title
         fields = '__all__'
 
-    def get_rating(self, obj):
-        reviews = Review.objects.filter(title=obj.id)
-        if not reviews:
-            return None
-        average_rating = reviews.aggregate(Avg('score'))['score__avg']
-        return int(average_rating)
+    def __init__(self, *args, **kwargs):
+        super(TitleSerializer, self).__init__(*args, **kwargs)
+        if self.context['request'].method == 'GET':
+            self.fields['genre'] = GenreSerializer(many=True)
+            self.fields['category'] = CategorySerializer()
+
+    def validate_year(self, value):
+        if value > dt.date.today().year:
+            raise serializers.ValidationError(
+                'The year cannot be greater than the current one.')
+        return value'''
 
 
 class ReviewSerializer(serializers.ModelSerializer):
