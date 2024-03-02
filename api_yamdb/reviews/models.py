@@ -1,14 +1,19 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from reviews.constants import MAX_TITLE_LEN, STR_LIMIT
+from .constants import MAX_TITLE_LENGTH, STR_LIMIT
 
 User = get_user_model()
 
 
 class Category(models.Model):
     """Модель для объектов Категории."""
-    name = models.CharField('Название', max_length=MAX_TITLE_LEN)
+    name = models.CharField('Название', max_length=MAX_TITLE_LENGTH)
+
+
+class Category(models.Model):
+    """Модель для объектов Категории."""
+    name = models.CharField('Заголовок', max_length=MAX_TITLE_LENGTH)
     slug = models.SlugField(
         'Идентификатор',
         unique=True,
@@ -26,7 +31,7 @@ class Category(models.Model):
 
 class Genre(models.Model):
     """Модель для объектов Жанров."""
-    name = models.CharField('Заголовок', max_length=256)
+    name = models.CharField('Заголовок', max_length=MAX_TITLE_LENGTH)
     slug = models.SlugField(
         'Идентификатор',
         unique=True)
@@ -42,7 +47,7 @@ class Genre(models.Model):
 
 class Title(models.Model):
     """Модель для объектов Произведений."""
-    name = models.CharField('Название', max_length=MAX_TITLE_LEN)
+    name = models.CharField('Название', max_length=MAX_TITLE_LENGTH)
     year = models.IntegerField('Год выпуска')
     description = models.TextField('Описание')
     genre = models.ManyToManyField(
@@ -104,7 +109,7 @@ class Review(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['title', 'author'],
-                name='onli_one_review'
+                name='unique_reviews'
             )
         ]
 

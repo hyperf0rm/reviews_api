@@ -1,15 +1,76 @@
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, viewsets
-from rest_framework.pagination import PageNumberPagination
-
+from rest_framework import (filters, generics, status,
+                            viewsets)
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
+from users.utils import send_confirmation_code
+from reviews.models import Category, Genre, Review, Title, Comment
 from api.filters import TitleFilter
 from api.mixins import CreateListDeleteViewSet
-from api.permissions import CreateDeleteOnlyAdmin, IsAuthorOrModeratorOrAdmin
-from api.serializers import (CategorySerializer, CommentSerializer,
-                             GenreSerializer, ReviewSerializer,
-                             TitleListSerializer, TitleSerializer)
-from reviews.models import Category, Comment, Genre, Review, Title
+from .permissions import (AdminOnly, IsAdminOrReadOnly,
+                          IsAdminModeratorOrAuthor)
+from .serializers import (SignupSerializer, TokenObtainSerializer,
+                          UserSerializer, CategorySerializer,
+                          GenreSerializer, TitleSerializer,
+                          ReviewSerializer, CommentSerializer)
+
+User = get_user_model()
+
+
+class SignupView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = SignupSerializer
+    permission_classes = (AllowAny,)
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if User.objects.filter(
+            username=request.data.get('username'),
+            email=request.data.get('email')
+        ).exists():
+            user = User.objects.get(
+                username=request.data['username'],
+                email=request.data['email']
+            )
+            send_confirmation_code(user)
+            return Response({
+                'detail': 'User already exists, sent a new confirmation code'
+            },
+                status=status.HTTP_200_OK)
+        if serializer.is_valid():
+            user = serializer.save()
+            send_confirmation_code(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TokenObtainView(TokenObtainPairView):
+    serializer_class = TokenObtainSerializer
+    permission_classes = (AllowAny,)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    permission_classes = (AdminOnly,)
+    serializer_class = UserSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+    lookup_field = 'username'
+    http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
+
+    @action(detail=False,
+            methods=['get', 'patch'],
+            permission_classes=(IsAuthenticated,))
+    def me(self, request):
+        self.kwargs['username'] = request.user.username
+        if request.method == 'GET':
+            return self.retrieve(request)
+        if request.method == 'PATCH':
+            return self.partial_update(request)
 
 
 class CategoryViewSet(CreateListDeleteViewSet):
@@ -17,10 +78,9 @@ class CategoryViewSet(CreateListDeleteViewSet):
     и удаления обьектов класса Category."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = [CreateDeleteOnlyAdmin, ]
+    permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
 
 
@@ -29,10 +89,9 @@ class GenreViewSet(CreateListDeleteViewSet):
     и удаления обьектов класса Genre."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = [CreateDeleteOnlyAdmin, ]
+    permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
 
 
@@ -40,24 +99,17 @@ class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет для класса Title."""
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
-    permission_classes = [CreateDeleteOnlyAdmin,]
-    http_method_names = ('get', 'post', 'patch', 'delete',)
-
-    def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return TitleListSerializer
-        return TitleSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    pagination_class = PageNumberPagination
-    queryset = Review.objects.all()
+    """Viewset for Review model"""
     serializer_class = ReviewSerializer
-    http_method_names = ('get', 'post', 'patch', 'delete')
-    permission_classes = [IsAuthorOrModeratorOrAdmin, ]
+    http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
+    permission_classes = (IsAdminModeratorOrAuthor,)
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -72,11 +124,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     """API для комментариев к отзывам."""
-    pagination_class = PageNumberPagination
-    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    http_method_names = ('get', 'post', 'patch', 'delete')
-    permission_classes = [IsAuthorOrModeratorOrAdmin, ]
+    http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
+    permission_classes = (IsAuthorOrModeratorOrAdmin,)
 
     def get_review(self):
         return get_object_or_404(Review, pk=self.kwargs.get('review_id'))
