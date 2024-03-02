@@ -109,6 +109,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
+    permission_classes = (AdminModeratorOrAuthor,)
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
     
     def get_queryset(self):
@@ -118,11 +119,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs['title_id'])
         serializer.save(author=self.request.user, title=title)
-
-    def get_permissions(self):
-        if self.action == 'partial_update' or self.action == 'destroy':
-            return (AdminModeratorOrAuthor(),)
-        return (IsAuthenticatedOrReadOnly(),)
     
     def create(self, request, *args, **kwargs):
         title = get_object_or_404(Title, pk=self.kwargs['title_id'])
