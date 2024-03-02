@@ -8,16 +8,15 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from users.utils import send_confirmation_code
-from reviews.models import Category, Genre, Review, Title
+from reviews.models import Category, Genre, Review, Title, Comment
 from api.filters import TitleFilter
 from api.mixins import CreateListDeleteViewSet
-
 from .permissions import (AdminOnly, IsAdminOrReadOnly,
                           IsAdminModeratorOrAuthor)
 from .serializers import (SignupSerializer, TokenObtainSerializer,
-                          UserSerializer,
-                          CategorySerializer, GenreSerializer,
-                          ReviewSerializer, TitleSerializer)
+                          UserSerializer, CategorySerializer,
+                          GenreSerializer, TitleSerializer,
+                          ReviewSerializer, CommentSerializer)
 
 User = get_user_model()
 
@@ -108,7 +107,6 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Viewset for Review model"""
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
     permission_classes = (IsAdminModeratorOrAuthor,)
@@ -122,3 +120,20 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.get_title().reviews.all()
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    """API для комментариев к отзывам."""
+    serializer_class = CommentSerializer
+    http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
+    permission_classes = (IsAuthorOrModeratorOrAdmin,)
+
+    def get_review(self):
+        return get_object_or_404(Review, pk=self.kwargs.get('review_id'))
+
+    def perform_create(self, serializer):
+        serializer.is_valid(raise_exception=False)
+        serializer.save(review=self.get_review(), author=self.request.user)
+
+    def get_queryset(self):
+        return self.get_review().comments.all()
