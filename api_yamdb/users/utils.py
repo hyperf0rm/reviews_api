@@ -5,6 +5,7 @@ from django.core.mail import send_mail
 
 User = get_user_model()
 
+
 def send_confirmation_code(user):
     code = r.randint(1000, 9999)
     send_mail(

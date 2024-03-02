@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from reviews.models import Category, Comment, Genre, Review, Title
 
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = (

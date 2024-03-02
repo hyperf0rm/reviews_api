@@ -1,9 +1,9 @@
-from enum import Enum
-
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
                                         PermissionsMixin)
 from django.core.validators import RegexValidator
 from django.db import models
+
+from .roles import Roles
 
 
 class UserManager(BaseUserManager):
@@ -37,12 +37,6 @@ class UserManager(BaseUserManager):
         return self.create_user(username, email, password, **extra_fields)
 
 
-class Roles(str, Enum):
-    USER = 'user'
-    MODERATOR = 'moderator'
-    ADMIN = 'admin'
-
-
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(
         'username',
@@ -61,7 +55,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(
         'role',
         max_length=10,
-        choices=[(choice.value, choice.value) for choice in Roles], 
+        choices=[(choice.value, choice.value) for choice in Roles],
         default=Roles.USER)
     confirmation_code = models.CharField(max_length=4, null=True, blank=True)
     is_active = models.BooleanField(default=True)
