@@ -75,11 +75,22 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['email',]
 
     class Meta:
+        ordering = ('username',)
         constraints = [
             models.UniqueConstraint(
                 fields=['username', 'email'],
                 name='unique_users')
         ]
+
+    @property
+    def is_admin(self):
+        return (self.is_staff
+                or self.is_superuser
+                or self.role == Roles.ADMIN)
+
+    @property
+    def is_moderator(self):
+        return self.role == Roles.MODERATOR
 
     def __str__(self):
         return self.username[:20]

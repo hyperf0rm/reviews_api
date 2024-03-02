@@ -8,11 +8,6 @@ User = get_user_model()
 
 class Category(models.Model):
     """Модель для объектов Категории."""
-    name = models.CharField('Название', max_length=MAX_TITLE_LENGTH)
-
-
-class Category(models.Model):
-    """Модель для объектов Категории."""
     name = models.CharField('Заголовок', max_length=MAX_TITLE_LENGTH)
     slug = models.SlugField(
         'Идентификатор',
