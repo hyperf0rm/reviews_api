@@ -112,7 +112,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
-    permission_classes = (IsAuthorOrModeratorOrAdmin,)
+    permission_classes = (IsAdminModeratorOrAuthor,)
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
