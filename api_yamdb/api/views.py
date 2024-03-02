@@ -12,8 +12,8 @@ from reviews.models import Category, Genre, Review, Title
 from api.filters import TitleFilter
 from api.mixins import CreateListDeleteViewSet
 
-from .permissions import (AdminOnly, CreateDeleteOnlyAdmin,
-                          IsAuthorOrModeratorOrAdmin)
+from .permissions import (AdminOnly, IsAdminOrReadOnly,
+                          IsAdminModeratorOrAuthor, IsAuthorOrModeratorOrAdmin)
 from .serializers import (SignupSerializer, TokenObtainSerializer,
                           UserProfileSerializer, UserSerializer,
                           CategorySerializer, GenreSerializer,
@@ -82,7 +82,7 @@ class CategoryViewSet(CreateListDeleteViewSet):
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = (CreateDeleteOnlyAdmin,)
+    permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
 
 
@@ -93,7 +93,7 @@ class GenreViewSet(CreateListDeleteViewSet):
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = (CreateDeleteOnlyAdmin,)
+    permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
 
 
@@ -103,7 +103,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
-    permission_classes = (CreateDeleteOnlyAdmin,)
+    permission_classes = (IsAdminOrReadOnly,)
     http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
 
 
