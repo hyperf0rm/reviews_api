@@ -21,15 +21,10 @@ class UserSerializer(serializers.ModelSerializer):
                   'first_name', 'last_name',
                   'bio', 'role')
 
-
-class UserProfileSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = ('username', 'email',
-                  'first_name', 'last_name',
-                  'bio', 'role')
-        read_only_fields = ('role',)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.context['view'].action == 'me':
+            self.fields['role'].read_only = True
 
 
 class SignupSerializer(serializers.ModelSerializer):

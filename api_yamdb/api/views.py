@@ -13,9 +13,9 @@ from api.filters import TitleFilter
 from api.mixins import CreateListDeleteViewSet
 
 from .permissions import (AdminOnly, IsAdminOrReadOnly,
-                          IsAdminModeratorOrAuthor, IsAuthorOrModeratorOrAdmin)
+                          IsAdminModeratorOrAuthor)
 from .serializers import (SignupSerializer, TokenObtainSerializer,
-                          UserProfileSerializer, UserSerializer,
+                          UserSerializer,
                           CategorySerializer, GenreSerializer,
                           ReviewSerializer, TitleSerializer)
 
@@ -65,8 +65,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False,
             methods=['get', 'patch'],
-            permission_classes=(IsAuthenticated,),
-            serializer_class=UserProfileSerializer)
+            permission_classes=(IsAuthenticated,))
     def me(self, request):
         self.kwargs['username'] = request.user.username
         if request.method == 'GET':
