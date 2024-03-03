@@ -7,6 +7,7 @@ User = get_user_model()
 
 
 def send_confirmation_code(user):
+    """Generates confirmation code and sends it to user's email."""
     code = r.randint(1000, 9999)
     send_mail(
         'Your confirmation code for yamdb signup',

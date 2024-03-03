@@ -1,13 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from .constants import MAX_TITLE_LENGTH, STR_LIMIT
+from reviews.constants import MAX_TITLE_LENGTH, STR_LIMIT
 
 User = get_user_model()
 
 
 class Category(models.Model):
-    """Модель для объектов Категории."""
+    """Model for Category objects."""
+
     name = models.CharField('Заголовок', max_length=MAX_TITLE_LENGTH)
     slug = models.SlugField(
         'Идентификатор',
@@ -25,7 +26,8 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
-    """Модель для объектов Жанров."""
+    """Model for Genre objects."""
+
     name = models.CharField('Заголовок', max_length=MAX_TITLE_LENGTH)
     slug = models.SlugField(
         'Идентификатор',
@@ -41,7 +43,8 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    """Модель для объектов Произведений."""
+    """Model for Title objects."""
+
     name = models.CharField('Название', max_length=MAX_TITLE_LENGTH)
     year = models.IntegerField('Год выпуска')
     description = models.TextField('Описание')
@@ -69,6 +72,8 @@ class Title(models.Model):
 
 
 class Review(models.Model):
+    """Model for Review objects."""
+
     SCORE_CHOICES = (
         (1, '1'),
         (2, '2'),
@@ -114,11 +119,15 @@ class Review(models.Model):
 
 
 class GenreTitle(models.Model):
+    """Intermediate model for ManyToMany relations between Title and Genre."""
+
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
 
 class Comment(models.Model):
+    """Model for Comment objects."""
+
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     review = models.ForeignKey(
         Review,

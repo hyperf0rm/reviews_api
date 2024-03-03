@@ -3,7 +3,7 @@ from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
 from django.core.validators import RegexValidator
 from django.db import models
 
-from .roles import Roles
+from users.roles import Roles
 
 
 class UserManager(BaseUserManager):
@@ -11,9 +11,9 @@ class UserManager(BaseUserManager):
 
     def create_user(self, username, email, password=None, **extra_fields):
         if not username:
-            raise ValueError('Username must be set')
+            raise ValueError('Username must be set.')
         if not email:
-            raise ValueError('Users must have an email address')
+            raise ValueError('Users must have an email address.')
 
         user = self.model(
             username=username,
@@ -38,6 +38,8 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    """Model for User objects."""
+
     username = models.CharField(
         'username',
         max_length=150,
@@ -78,12 +80,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def is_admin(self):
+        """Returns True if user is admin, False otherwise."""
         return (self.is_staff
                 or self.is_superuser
                 or self.role == Roles.ADMIN)
 
     @property
     def is_moderator(self):
+        """Returns True if user is moderator, False otherwise."""
         return self.role == Roles.MODERATOR
 
     def __str__(self):

@@ -1,9 +1,9 @@
 import datetime as dt
 
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 from django.db.utils import IntegrityError
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -14,6 +14,7 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Serializer for processing requests to User objects."""
 
     class Meta:
         model = User
@@ -28,13 +29,14 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SignupSerializer(serializers.ModelSerializer):
+    """Serializer for signing up and obtaining confirmation code."""
 
     class Meta:
         model = User
         fields = ('username', 'email')
 
     def validate_username(self, value):
-
+        """Validate username and return valid value."""
         if value.lower() == 'me':
             raise serializers.ValidationError(
                 'Cannot use "me" as username.')
@@ -45,7 +47,7 @@ class SignupSerializer(serializers.ModelSerializer):
         return value
 
     def validate_email(self, value):
-
+        """Validate email and return valid value."""
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError(
                 'User with such email already exists.')
@@ -53,6 +55,8 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
 class TokenObtainSerializer(TokenObtainPairSerializer):
+    """Serializer for obtaining access token."""
+
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
@@ -61,7 +65,7 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
         del self.fields['password']
 
     def validate(self, data):
-
+        """Validate request data and return access token."""
         user = get_object_or_404(User, username=data.get('username'))
 
         if not User.objects.filter(
@@ -78,23 +82,24 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    """Сериализатор для обработки запросов к объекту Category"""
+    """Serializer for processing requests to Category objects."""
 
     class Meta:
-        exclude = 'id',
         model = Category
+        exclude = 'id',
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    """Сериализатор для обработки запросов к объекту Genre."""
+    """Serializer for processing requests to Genre objects."""
 
     class Meta:
-        exclude = 'id',
         model = Genre
+        exclude = 'id',
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    """Сериализатр для обработки запросов к объекту Title"""
+    """Serializer for processing requests to Title objects."""
+
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),
         slug_field='slug',
@@ -117,13 +122,15 @@ class TitleSerializer(serializers.ModelSerializer):
             self.fields['category'] = CategorySerializer()
 
     def validate_year(self, value):
+        """Validate year and return valid value."""
         year = dt.date.today().year
         if not (value <= year):
-            raise serializers.ValidationError('Год выпуска не может быть'
-                                              'больше текущего.')
+            raise serializers.ValidationError('The year cannot be greater'
+                                              'than the current one.')
         return value
 
     def get_rating(self, obj):
+        """Get average rating of the Title object."""
         reviews = Review.objects.filter(title=obj.id)
         if not reviews:
             return None
@@ -132,6 +139,8 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    """Serializer for processing requests to Review objects."""
+
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username')
 
@@ -144,11 +153,13 @@ class ReviewSerializer(serializers.ModelSerializer):
         try:
             return super().create(validated_data)
         except IntegrityError:
-            raise ValidationError('К одному произведению можно'
-                                  'оставить только один отзыв.', code=404)
+            raise ValidationError('You can leave only one review'
+                                  'for a title.', code=404)
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Serializer for processing requests to Comment objects."""
+
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username')
 
