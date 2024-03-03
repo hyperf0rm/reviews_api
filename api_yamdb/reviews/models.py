@@ -68,6 +68,11 @@ class Title(models.Model):
         return self.name[:STR_LIMIT]
 
 
+class GenreTitle(models.Model):
+    Genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    Title = models.ForeignKey(Title, on_delete=models.CASCADE)
+
+
 class Review(models.Model):
     SCORE_CHOICES = (
         (1, '1'),
@@ -111,6 +116,11 @@ class Review(models.Model):
     def str(self):
         return (f'Отзыв {self.id[:STR_LIMIT]}'
                 f'от {self.author.username[:STR_LIMIT]}')
+
+
+class GenreTitle(models.Model):
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
 
 class Comment(models.Model):
