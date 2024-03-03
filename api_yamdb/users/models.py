@@ -4,7 +4,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 from users.roles import Roles
-from users.constants import STR_LIMIT
+from users.constants import STR_LIMIT, NAME_MAX_LENGTH, EMAIL_MAX_LENGTH
 from users.validators import validate_username
 
 
@@ -44,7 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     username = models.CharField(
         'username',
-        max_length=150,
+        max_length=NAME_MAX_LENGTH,
         unique=True,
         validators=[
             RegexValidator(
@@ -53,9 +53,9 @@ class User(AbstractBaseUser, PermissionsMixin):
                 code='invalid_username'
             ),
             validate_username])
-    email = models.EmailField(max_length=254, unique=True)
-    first_name = models.CharField(max_length=150, blank=True)
-    last_name = models.CharField(max_length=150, blank=True)
+    email = models.EmailField(max_length=EMAIL_MAX_LENGTH, unique=True)
+    first_name = models.CharField(max_length=NAME_MAX_LENGTH, blank=True)
+    last_name = models.CharField(max_length=NAME_MAX_LENGTH, blank=True)
     bio = models.TextField(blank=True)
     role = models.CharField(
         max_length=10,
