@@ -1,5 +1,3 @@
-import datetime as dt
-
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -119,14 +117,6 @@ class TitleSerializer(serializers.ModelSerializer):
         if self.context['request'].method == 'GET':
             self.fields['genre'] = GenreSerializer(many=True)
             self.fields['category'] = CategorySerializer()
-
-    def validate_year(self, value):
-        """Validate year and return valid value."""
-        year = dt.date.today().year
-        if not (value <= year):
-            raise serializers.ValidationError('The year cannot be greater'
-                                              'than the current one.')
-        return value
 
     def get_rating(self, obj):
         """Get average rating of the Title object."""

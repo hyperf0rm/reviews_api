@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 
 from reviews.constants import MAX_TITLE_LENGTH, STR_LIMIT
+from reviews.validators import validate_year
 
 User = get_user_model()
 
@@ -46,7 +47,7 @@ class Title(models.Model):
     """Model for Title objects."""
 
     name = models.CharField('Название', max_length=MAX_TITLE_LENGTH)
-    year = models.IntegerField('Год выпуска')
+    year = models.IntegerField('Год выпуска', validators=[validate_year])
     description = models.TextField('Описание', blank=True)
     genre = models.ManyToManyField(
         Genre,
