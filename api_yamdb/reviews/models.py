@@ -69,8 +69,8 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
-    Genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    Title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
 
 class Review(models.Model):
