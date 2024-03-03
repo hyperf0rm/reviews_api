@@ -54,7 +54,7 @@ class SignupView(generics.CreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# not working
+# doesnt work
 '''    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -148,8 +148,9 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = TitleFilter
+    ordering_fields = ('name', 'year', 'category', 'genre')
     permission_classes = [IsAdminOrReadOnly]
     http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
 
@@ -171,15 +172,20 @@ class ReviewViewSet(viewsets.ModelViewSet):
     http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
     permission_classes = [IsAdminModeratorOrAuthor]
 
+    def get_queryset(self):
+        return self.get_title().reviews.all()
+
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
 
-    def perform_create(self, serializer):
-        serializer.is_valid(raise_exception=False)
-        serializer.save(title=self.get_title(), author=self.request.user)
+    def create(self, request, *args, **kwargs):
+        request.POST._mutable = True
+        request.data.update({'title': self.get_title().id})
+        request.POST._mutable = False
+        return super().create(request, *args, **kwargs)
 
-    def get_queryset(self):
-        return self.get_title().reviews.all()
+    def perform_create(self, serializer):
+        serializer.save(title=self.get_title(), author=self.request.user)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -200,10 +206,12 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminModeratorOrAuthor]
 
     def get_review(self):
-        return get_object_or_404(Review, pk=self.kwargs.get('review_id'))
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        return get_object_or_404(Review,
+                                 pk=self.kwargs.get('review_id'),
+                                 title=title)
 
     def perform_create(self, serializer):
-        serializer.is_valid(raise_exception=False)
         serializer.save(review=self.get_review(), author=self.request.user)
 
     def get_queryset(self):

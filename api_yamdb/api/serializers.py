@@ -2,10 +2,9 @@ import datetime as dt
 
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
-from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
+from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -142,19 +141,22 @@ class ReviewSerializer(serializers.ModelSerializer):
     """Serializer for processing requests to Review objects."""
 
     author = serializers.SlugRelatedField(
-        read_only=True, slug_field='username')
+        read_only=True, slug_field='username',
+        default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Review
         fields = '__all__'
-        read_only_fields = ('title',)
+        extra_kwargs = {
+            'title': {'write_only': True},
+        }
 
-    def create(self, validated_data):
-        try:
-            return super().create(validated_data)
-        except IntegrityError:
-            raise ValidationError('You can leave only one review'
-                                  'for each title.', code=404)
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=('author', 'title')
+            )
+        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
