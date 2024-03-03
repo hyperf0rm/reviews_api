@@ -154,7 +154,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             return super().create(validated_data)
         except IntegrityError:
             raise ValidationError('You can leave only one review'
-                                  'for a title.', code=404)
+                                  'for each title.', code=404)
 
 
 class CommentSerializer(serializers.ModelSerializer):
