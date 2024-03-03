@@ -113,11 +113,6 @@ class Review(models.Model):
                 f'от {self.author.username[:STR_LIMIT]}')
 
 
-class GenreTitle(models.Model):
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-
-
 class Comment(models.Model):
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     review = models.ForeignKey(
