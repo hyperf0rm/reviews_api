@@ -32,6 +32,13 @@ class SignupSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email')
 
+    def validate_username(self, value):
+        """Validate username and return valid value."""
+        if value.lower() == 'me':
+            raise serializers.ValidationError(
+                'Cannot use "me" as username.')
+        return value
+
 
 class TokenObtainSerializer(TokenObtainPairSerializer):
     """Serializer for obtaining access token."""
