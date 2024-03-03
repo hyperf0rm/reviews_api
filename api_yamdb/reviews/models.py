@@ -121,9 +121,10 @@ class Review(BaseReviewCommentModel):
             )
         ]
 
-    def str(self):
-        return (f'Отзыв {self.id[:STR_LIMIT]}'
-                f'от {self.author.username[:STR_LIMIT]}')
+    def __str__(self):
+        return (f'Текст отзыва на {self.title.name[:STR_LIMIT]}'
+                f'от {self.author.username[:STR_LIMIT]}:'
+                f'{self.text[:STR_LIMIT]}')
 
 
 class Comment(BaseReviewCommentModel):
@@ -140,6 +141,11 @@ class Comment(BaseReviewCommentModel):
         default_related_name = 'comments'
         verbose_name = 'комментарий к отзыву'
         verbose_name_plural = 'Комментарии к отзывам'
+
+    def __str__(self):
+        return (f'Текст комментария от {self.author[:STR_LIMIT]}'
+                f'на отзыв от {self.review.author[:STR_LIMIT]}:'
+                f'{self.text[:STR_LIMIT]}')
 
 
 class GenreTitle(models.Model):
