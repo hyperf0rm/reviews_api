@@ -1,8 +1,8 @@
 import csv
-from django.core.management.base import BaseCommand
-from django.apps import apps
 import io
 
+from django.apps import apps
+from django.core.management.base import BaseCommand
 
 PATHS_MODELS = {
     'static/data/category.csv': 'Category',
@@ -16,7 +16,7 @@ PATHS_MODELS = {
 
 
 class Command(BaseCommand):
-    help = 'Imports category.csv data into database'
+    help = 'Imports csv data into database'
 
     def handle(self, *args, **options):
         for path, model in PATHS_MODELS.items():
