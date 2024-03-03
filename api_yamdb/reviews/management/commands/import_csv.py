@@ -1,5 +1,4 @@
 import csv
-import io
 
 from django.apps import apps
 from django.core.management.base import BaseCommand
@@ -24,7 +23,7 @@ class Command(BaseCommand):
                 _model = apps.get_model('reviews', model)
             else:
                 _model = apps.get_model('users', model)
-            with io.open(path, mode='r', encoding='utf-8') as csv_file:
+            with open(path, mode='r', encoding='utf-8') as csv_file:
                 reader = csv.reader(csv_file, delimiter=',')
                 header = next(reader)
                 for row in reader:
