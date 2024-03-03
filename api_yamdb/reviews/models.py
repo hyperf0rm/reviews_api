@@ -47,7 +47,7 @@ class Title(models.Model):
     """Model for Title objects."""
 
     name = models.CharField('Название', max_length=MAX_TITLE_LENGTH)
-    year = models.IntegerField('Год выпуска', validators=[validate_year])
+    year = models.SmallIntegerField('Год выпуска', validators=[validate_year])
     description = models.TextField('Описание', blank=True)
     genre = models.ManyToManyField(
         Genre,
@@ -95,7 +95,7 @@ class Review(models.Model):
         verbose_name='Произведение'
     )
     text = models.TextField('Текст отзыва')
-    score = models.IntegerField(verbose_name='Оценка', choices=SCORE_CHOICES)
+    score = models.PositiveSmallIntegerField('Оценка', choices=SCORE_CHOICES)
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
