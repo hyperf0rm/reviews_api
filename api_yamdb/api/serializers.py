@@ -32,24 +32,6 @@ class SignupSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email')
 
-    def validate_username(self, value):
-        """Validate username and return valid value."""
-        if value.lower() == 'me':
-            raise serializers.ValidationError(
-                'Cannot use "me" as username.')
-
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError(
-                'User with such username already exists.')
-        return value
-
-    def validate_email(self, value):
-        """Validate email and return valid value."""
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError(
-                'User with such email already exists.')
-        return value
-
 
 class TokenObtainSerializer(TokenObtainPairSerializer):
     """Serializer for obtaining access token."""

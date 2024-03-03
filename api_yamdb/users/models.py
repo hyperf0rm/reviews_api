@@ -4,6 +4,8 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 from users.roles import Roles
+from users.constants import STR_LIMIT
+from users.validators import validate_username
 
 
 class UserManager(BaseUserManager):
@@ -49,13 +51,13 @@ class User(AbstractBaseUser, PermissionsMixin):
                 regex=r'^[\w.@+-]+\Z',
                 message='Enter a valid username',
                 code='invalid_username'
-            )])
-    email = models.EmailField('email address', max_length=254, unique=True)
-    first_name = models.CharField('first name', max_length=150, blank=True)
-    last_name = models.CharField('last name', max_length=150, blank=True)
-    bio = models.TextField('biography', blank=True)
+            ),
+            validate_username])
+    email = models.EmailField(max_length=254, unique=True)
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
+    bio = models.TextField(blank=True)
     role = models.CharField(
-        'role',
         max_length=10,
         choices=[(choice.value, choice.value) for choice in Roles],
         default=Roles.USER)
@@ -91,4 +93,4 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.role == Roles.MODERATOR
 
     def __str__(self):
-        return self.username[:20]
+        return self.username[:STR_LIMIT]

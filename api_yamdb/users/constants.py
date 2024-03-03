@@ -1,0 +1,1 @@
+STR_LIMIT = 20
