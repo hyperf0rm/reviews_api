@@ -2,9 +2,11 @@ from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
                                         PermissionsMixin)
 from django.core.validators import RegexValidator
 from django.db import models
+from django.utils import timezone
 
+from users.constants import (CODE_LENGTH, EMAIL_MAX_LENGTH, NAME_MAX_LENGTH,
+                             ROLE_LENGTH, STR_LIMIT)
 from users.roles import Roles
-from users.constants import STR_LIMIT, NAME_MAX_LENGTH, EMAIL_MAX_LENGTH
 from users.validators import validate_username
 
 
@@ -58,14 +60,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=NAME_MAX_LENGTH, blank=True)
     bio = models.TextField(blank=True)
     role = models.CharField(
-        max_length=10,
+        max_length=ROLE_LENGTH,
         choices=[(choice.value, choice.value) for choice in Roles],
         default=Roles.USER)
-    confirmation_code = models.CharField(max_length=4, null=True, blank=True)
+    confirmation_code = models.CharField(max_length=CODE_LENGTH,
+                                         null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    date_joined = models.DateTimeField(auto_now_add=True)
+    date_joined = models.DateTimeField(default=timezone.now)
 
     objects = UserManager()
 

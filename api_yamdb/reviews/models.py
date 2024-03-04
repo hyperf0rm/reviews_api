@@ -37,6 +37,7 @@ class Category(BaseNameModel, BaseSlugModel):
     """Model for Category objects."""
 
     class Meta(BaseNameModel.Meta):
+        default_related_name = 'categories'
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
 
@@ -45,6 +46,7 @@ class Genre(BaseNameModel, BaseSlugModel):
     """Model for Genre objects."""
 
     class Meta(BaseNameModel.Meta):
+        default_related_name = 'genres'
         verbose_name = 'жанр'
         verbose_name_plural = 'Жанры'
 
@@ -57,7 +59,6 @@ class Title(BaseNameModel):
     genre = models.ManyToManyField(
         Genre,
         through='GenreTitle',
-        blank=True,
         verbose_name='Жанр'
     )
     category = models.ForeignKey(
@@ -104,7 +105,6 @@ class Review(BaseReviewCommentModel):
     )
     title = models.ForeignKey(
         Title,
-        null=True,
         on_delete=models.CASCADE,
         verbose_name='Произведение'
     )
@@ -132,7 +132,6 @@ class Comment(BaseReviewCommentModel):
 
     review = models.ForeignKey(
         Review,
-        null=True,
         on_delete=models.CASCADE,
         verbose_name='Отзыв'
     )
